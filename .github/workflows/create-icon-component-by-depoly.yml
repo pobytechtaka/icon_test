@@ -1,36 +1,50 @@
-name: Run Script on Specific PR Source Branch
+name: NPM Install, Run Script, and Commit Changes on PR
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened]
     branches:
-      - develop  # main 브랜치로의 PR에 대해 트리거 됩니다. 필요한 브랜치로 수정하세요.
+      - develop  # PR의 대상 브랜치가 main일 때
+  workflow_dispatch:  # 수동 실행 옵션 유지
 
 jobs:
-  run-script:
-    if: startsWith(github.head_ref, 'icons/')  # 소스 브랜치가 icons/로 시작할 때만 실행
+  build-and-commit:
     runs-on: ubuntu-latest
-
+    if: startsWith(github.head_ref, 'icons/')  # PR의 소스 브랜치가 'icons/'로 시작할 때만 실행
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
         with:
-          node-version: '18.20.4'  # Node.js 버전을 지정합니다.
+          fetch-depth: 0  # 전체 Git 히스토리를 가져옵니다
+          ref: ${{ github.head_ref }}  # PR의 소스 브랜치를 체크아웃
 
-      - name: Install dependencies with Yarn
-        run: npm install
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'  # 원하는 Node.js 버전으로 변경 가능
 
-      - name: Run script from package.json using Yarn
-        run: npm run transform  # 여기에서 실행하려는 스크립트를 지정합니다.
+      - name: Install dependencies
+        run: npm ci  # npm install 대신 npm ci를 사용하여 정확한 버전 설치
+
+      - name: Run script
+        run: npm run transform  # 실행할 스크립트 이름으로 변경
 
       - name: Commit changes
         run: |
-          git config --local user.email "poby@techtaka.com"
-          git config --local user.name "pobytechtaka"
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
           git add .
-          git commit -m "추가된 아이콘 이미지에 대한 아이콘 컴포넌트를 생성하였습니다."
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          git commit -m "Auto-commit after running npm script" || echo "No changes to commit"
+          git push origin ${{ github.head_ref }}
+
+      - name: Update Pull Request
+        uses: actions/github-script@v6
+        if: success()
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🤖 자동화된 스크립트가 실행되었고, 변경사항이 이 PR에 추가되었습니다. 리뷰해주세요!'
+            })
