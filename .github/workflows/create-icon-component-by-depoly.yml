@@ -20,17 +20,17 @@ jobs:
           node-version: '18.20.4'  # Node.js 버전을 지정합니다.
 
       - name: Install dependencies with Yarn
-        run: yarn install
+        run: npm install
 
       - name: Run script from package.json using Yarn
-        run: yarn <your-script-name>  # 여기에서 실행하려는 스크립트를 지정합니다.
+        run: npm run transform  # 여기에서 실행하려는 스크립트를 지정합니다.
 
       - name: Commit changes
         run: |
-          git config --local user.email "your-email@example.com"
-          git config --local user.name "github-actions[bot]"
+          git config --local user.email "poby@techtaka.com"
+          git config --local user.name "pobytechtaka"
           git add .
-          git commit -m "Apply changes from script"
+          git commit -m "추가된 아이콘 이미지에 대한 아이콘 컴포넌트를 생성하였습니다."
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
