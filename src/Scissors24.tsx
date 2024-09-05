@@ -38,10 +38,10 @@ const Scissors24 = (
         <feGaussianBlur stdDeviation={2} />
         <feComposite in2="hardAlpha" operator="out" />
         <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0" />
-        <feBlend in2="BackgroundImageFix" result="effect1_dropShadow_394_13" />
+        <feBlend in2="BackgroundImageFix" result="effect1_dropShadow_464_98" />
         <feBlend
           in="SourceGraphic"
-          in2="effect1_dropShadow_394_13"
+          in2="effect1_dropShadow_464_98"
           result="shape"
         />
       </filter>
